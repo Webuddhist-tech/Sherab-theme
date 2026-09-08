@@ -1,5 +1,37 @@
 /* styles for dark mode protection in mobile apps */
 
+@font-face {
+	font-family: 'Cormorant Garamond';
+	src: url('../fonts/Cormorant_Garamond/CormorantGaramond-Variable.woff2') format('woff2-variations');
+	font-weight: 300 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'DM Sans';
+	src: url('../fonts/DM_Sans/DMSans-Variable.woff2') format('woff2-variations');
+	font-weight: 100 1000;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Noto Serif Tibetan';
+	src: url('../fonts/sherab_tibetan_fonts/Noto_Serif_Tibetan/NotoSerifTibetan-VariableFont_wght.ttf') format('truetype');
+	font-weight: 100 900;
+	font-display: swap;
+	unicode-range: U+0F00-0FFF;
+}
+
+@font-face {
+	font-family: 'Jomolhari';
+	src: url('../fonts/sherab_tibetan_fonts/Jomolhari/Jomolhari-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-display: swap;
+	unicode-range: U+0F00-0FFF;
+}
+
 .sherab-themed-certificate .cert-container,
 .sherab-themed-certificate .cert-container * {
 	color-scheme: only light !important;
@@ -11,50 +43,58 @@
 
 .sherab-themed-certificate .cert-container {
 	background: #fff !important;
-	color: #222 !important;
+	color: #1C0A00 !important;
 }
 
 .sherab-themed-certificate .cert-left {
-	background-color: #F36F2A !important;
+	background-color: transparent !important;
 }
 
 .sherab-themed-certificate .cert-right {
-	background: #fff !important;
+	background: transparent !important;
 }
 
 .sherab-themed-certificate .cert-title,
 .sherab-themed-certificate .cert-name,
-.sherab-themed-certificate .signatory-details,
+.sherab-themed-certificate .course-name,
 .sherab-themed-certificate .signatory-name {
-	color: #222 !important;
-	-webkit-text-fill-color: #222 !important;
+	color: #1C0A00 !important;
+	-webkit-text-fill-color: #1C0A00 !important;
 }
 
 .sherab-themed-certificate .cert-subtitle {
-	color: #d4a34b !important;
-	-webkit-text-fill-color: #d4a34b !important;
+	color: #623718 !important;
+	-webkit-text-fill-color: #623718 !important;
 }
 
 .sherab-themed-certificate .cert-presented,
 .sherab-themed-certificate .cert-description,
-.sherab-themed-certificate .course-name,
+.sherab-themed-certificate .cert-completion-lead,
+.sherab-themed-certificate .cert-course-auth,
+.sherab-themed-certificate .signatory-role,
+.sherab-themed-certificate .signatory-org {
+	color: #5a2d0c !important;
+	-webkit-text-fill-color: #5a2d0c !important;
+}
+
 .sherab-themed-certificate .cert-footer,
-.sherab-themed-certificate .cert-footer .cert-value {
-	color: #444 !important;
-	-webkit-text-fill-color: #444 !important;
+.sherab-themed-certificate .cert-footer .cert-value,
+.sherab-themed-certificate .cert-footer-separator {
+	color: #623718 !important;
+	-webkit-text-fill-color: #623718 !important;
 }
 
 .sherab-themed-certificate .cert-footer .cert-label {
-	color: #000 !important;
-	-webkit-text-fill-color: #000 !important;
+	color: #1C0A00 !important;
+	-webkit-text-fill-color: #1C0A00 !important;
 }
 
 .sherab-themed-certificate .cert-name {
-	border-bottom-color: #222 !important;
+	border-bottom: none !important;
 }
 
 .sherab-themed-certificate .signatory-img-wrapper {
-	border-bottom-color: #ccc !important;
+	border-bottom-color: transparent !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -72,12 +112,14 @@
 
 	html.sherab-cert-mobile-webview .sherab-themed-certificate .cert-side-art,
 	html.sherab-cert-mobile-webview .sherab-themed-certificate .cert-logo,
+	html.sherab-cert-mobile-webview .sherab-themed-certificate .cert-top-logo,
+	html.sherab-cert-mobile-webview .sherab-themed-certificate .cert-partner-logo,
 	html.sherab-cert-mobile-webview .sherab-themed-certificate .signatory-img {
 		filter: none !important;
 	}
 
 	html.sherab-cert-mobile-webview .sherab-themed-certificate .cert-left-logo {
-		filter: brightness(0) invert(1) !important;
+		display: none !important;
 	}
 }
 
@@ -148,37 +190,68 @@ html.sherab-cert-mobile-webview .mobile-app-certificate-message a {
 	align-items: center;
 	background: #f8f8f8;
 	padding: 2rem 0;
-	font-family: 'Open Sans', sans-serif;
+	font-family: 'DM Sans', 'Noto Serif Tibetan', sans-serif;
 	overflow-x: hidden;
 }
 
 .cert-container {
 	width: 1200px;
+	min-height: 848px;
 	max-width: none;
 	display: flex;
 	position: relative;
 	background: #fff;
-	box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
 	flex-shrink: 0;
+	box-sizing: border-box;
+}
+
+/* Corner ornaments */
+.cert-corner {
+	position: absolute;
+	width: 220px;
+	height: 220px;
+	pointer-events: none;
+	z-index: 3;
+}
+
+.cert-corner svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+.cert-corner-tl {
+	top: 0;
+	left: 0;
+}
+
+.cert-corner-tr {
+	top: 0;
+	right: 0;
+}
+
+.cert-corner-bl {
+	bottom: 0;
+	left: 0;
+}
+
+.cert-corner-br {
+	bottom: 0;
+	right: 0;
 }
 
 .cert-left {
 	position: relative;
-	width: 920px;
-	background-color: #F36F2A;
+	width: 520px;
+	background-color: transparent;
 	display: flex;
 	align-items: flex-start;
 	justify-content: flex-start;
 }
 
 .cert-left-logo {
-	position: absolute;
-	top: 1rem;
-	left: 1rem;
-	width: 100px;
-	height: auto;
-	filter: brightness(0) invert(1);
-	z-index: 2;
+	display: none !important;
 }
 
 .cert-side-art-wrapper {
@@ -186,7 +259,7 @@ html.sherab-cert-mobile-webview .mobile-app-certificate-message a {
 	top: 0;
 	left: 0;
 	height: 100%;
-	width: 500px;
+	width: 520px;
 	overflow: visible;
 	z-index: 1;
 	pointer-events: none;
@@ -194,27 +267,47 @@ html.sherab-cert-mobile-webview .mobile-app-certificate-message a {
 
 .cert-side-art {
 	position: absolute;
-	top: 0;
+	top: 4%;
 	left: 0;
-	height: 100%;
+	height: 92%;
 	width: auto;
-	transform: translateX(5px);
+	transform: translateX(10px);
 	object-fit: contain;
 }
 
 .cert-right {
-	width: 100%;
-	padding: 1rem 4rem;
-	text-align: left;
+	flex: 1 1 auto;
+	padding: 3rem 4rem 2.5rem 1rem;
+	text-align: center;
 	position: relative;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	box-sizing: border-box;
+}
+
+.cert-top-content {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
 .cert-logo-wrapper {
-	height: 125px;
+	height: auto;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin: 0 auto;
+	margin: 0 auto 0.75rem;
+}
+
+.cert-top-logo {
+	width: 90px;
+	height: 90px;
+	display: block;
+	object-fit: contain;
 }
 
 .cert-logo {
@@ -224,29 +317,27 @@ html.sherab-cert-mobile-webview .mobile-app-certificate-message a {
 }
 
 .cert-title {
-	font-size: 3.5rem;
-	font-weight: 600;
+	font-family: 'Cormorant Garamond', 'Noto Serif Tibetan', 'Jomolhari', Georgia, serif;
+	font-size: 3rem;
+	font-weight: 500;
 	margin: 0;
-	color: #222;
-	letter-spacing: 8px;
+	color: #1C0A00;
+	letter-spacing: 0.22em;
+	line-height: 1;
 }
 
 .cert-subtitle {
-	font-size: 1.8rem;
+	font-family: 'DM Sans', 'Noto Serif Tibetan', sans-serif;
+	font-size: 0.75rem;
 	font-weight: 600;
-	color: #d4a34b;
-	letter-spacing: 2px;
-	margin-top: 0rem;
-	margin-bottom: 0rem;
+	color: #623718;
+	letter-spacing: 0.35em;
+	margin: 0.75rem 0 0;
+	text-transform: uppercase;
 }
 
 .cert-presented {
-	text-transform: uppercase;
-	font-weight: 600;
-	color: #555;
-	font-size: 1.2rem;
-	margin-top: 0.5rem;
-	margin-bottom: 0rem;
+	display: none;
 }
 
 .cert-header {
@@ -259,32 +350,64 @@ html.sherab-cert-mobile-webview .mobile-app-certificate-message a {
 }
 
 .cert-name {
-	font-family: 'Domine', serif;
-	font-size: 2.5rem;
+	font-family: 'Cormorant Garamond', 'Noto Serif Tibetan', 'Jomolhari', Georgia, serif;
+	font-size: 3rem;
 	font-weight: 400;
-	color: #222;
-	border-bottom: 1px dotted #222;
+	color: #1C0A00;
+	border-bottom: none !important;
 	display: block;
 	width: fit-content;
-	margin: 1rem auto;
+	margin: 1.5rem auto 0;
+	line-height: 1.1;
 	text-align: center;
-	padding: 0 1rem 0.25rem;
+	padding: 0;
+}
+
+.cert-divider {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 260px;
+	margin: 1.25rem auto 1.4rem;
+	gap: 0.6rem;
+}
+
+.cert-divider-line {
+	flex: 1;
+	height: 1px;
+	background-color: #f0b484;
+}
+
+.cert-divider-dot {
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background-color: #e8873a;
+	flex-shrink: 0;
 }
 
 .cert-description {
-	font-size: 1.2rem;
-	color: #444;
-	line-height: 1.6;
-	margin: 1rem auto;
-	height: 182px;
+	font-family: 'DM Sans', 'Noto Serif Tibetan', sans-serif;
+	font-size: 1.1rem;
+	color: #5a2d0c;
+	line-height: 1.5;
+	margin: 0 auto;
+	height: auto;
 	text-align: center;
+	max-width: 540px;
+}
+
+.cert-description p {
+	margin: 0;
 }
 
 .course-name {
-	font-weight: bolder;
-	font-size: 1.2rem;
-	color: #444;
-	line-height: 1.6;
+	font-family: 'Cormorant Garamond', 'Noto Serif Tibetan', 'Jomolhari', Georgia, serif;
+	font-size: 2rem;
+	font-weight: 500;
+	color: #1C0A00;
+	line-height: 1.25;
+	margin: 0.85rem auto;
 	text-align: center;
 	display: -webkit-box;
 	line-clamp: 3;
@@ -294,15 +417,31 @@ html.sherab-cert-mobile-webview .mobile-app-certificate-message a {
 	text-overflow: ellipsis;
 }
 
-.cert-signature {
-	margin-top: 0.5rem;
+.cert-partner-wrapper {
+	margin-top: 1.25rem;
+	margin-bottom: 0.5rem;
 	display: flex;
-	height: 140px;
+	align-items: center;
+	justify-content: center;
+}
+
+.cert-partner-logo {
+	max-height: 80px;
+	max-width: 220px;
+	width: auto;
+	object-fit: contain;
+}
+
+.cert-signature {
+	margin-bottom: 1rem;
+	display: flex;
+	min-height: 80px;
 	justify-content: center;
 	align-items: flex-start;
 	flex-wrap: wrap;
-	gap: 2rem;
+	gap: 3.5rem;
 	text-align: center;
+	width: 100%;
 }
 
 .signatory {
@@ -310,17 +449,21 @@ html.sherab-cert-mobile-webview .mobile-app-certificate-message a {
 	flex-direction: column;
 	align-items: center;
 	text-align: center;
+	width: 200px;
 	margin: 0;
 }
 
 .signatory-details {
+	border-top: 1px solid #dedbdb;
+	padding-top: 0.65rem;
+	width: 100%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	text-align: center;
-	line-height: 1.4;
-	color: #222;
-	margin-top: 0.5rem;
+	line-height: 1.3;
+	color: #1C0A00;
+	margin-top: 0;
 }
 
 .signatory-img-wrapper {
@@ -329,8 +472,9 @@ html.sherab-cert-mobile-webview .mobile-app-certificate-message a {
 	display: flex;
 	justify-content: center;
 	align-items: flex-end;
-	border-bottom: 1px dotted #ccc;
+	border-bottom: none;
 	box-sizing: border-box;
+	margin-bottom: 0.25rem;
 }
 
 .signatory-img {
@@ -341,48 +485,61 @@ html.sherab-cert-mobile-webview .mobile-app-certificate-message a {
 }
 
 .signatory-name {
+	font-family: 'DM Sans', 'Noto Serif Tibetan', sans-serif;
 	font-size: 1rem;
-	font-weight: 600;
-	color: #222;
+	font-weight: 500;
+	color: #1C0A00;
+	line-height: 1.3;
 }
 
 .signatory-role,
 .signatory-org {
-	font-size: 0.8rem;
+	font-family: 'DM Sans', 'Noto Serif Tibetan', sans-serif;
+	font-size: 0.75rem;
+	font-weight: 500;
+	letter-spacing: 0.10em;
+	text-transform: uppercase;
+	color: #5a2d0c;
+	margin-top: 0.25rem;
+	line-height: 1.3;
 }
 
 .cert-footer {
+	margin-top: 0.5rem;
+	margin-bottom: 1.5rem;
 	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	margin-top: 1.5rem;
-	font-size: 0.9rem;
-	color: #444;
-	text-align: left;
+	justify-content: center;
+	align-items: center;
+	gap: 0.6rem;
+	font-family: 'DM Sans', sans-serif;
+	font-size: 0.75rem;
+	font-weight: 500;
+	letter-spacing: 0.20em;
+	text-transform: uppercase;
+	color: #623718;
+	text-align: center;
 	width: 100%;
-	gap: 2rem;
 }
 
-.cert-footer>div {
+.cert-footer > div {
 	display: flex;
-	flex-direction: column;
-	flex: 0 0 auto;
+	flex-direction: row;
+	align-items: center;
 	width: auto;
 }
 
 .cert-footer .cert-label {
-	font-weight: 400;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-	color: #000;
-	margin-bottom: 0.25rem;
-	white-space: nowrap;
+	display: none;
 }
 
 .cert-footer .cert-value {
-	font-weight: 700;
-	color: #444;
+	color: #623718;
+	font-weight: 500;
 	white-space: nowrap;
+}
+
+.cert-footer-separator {
+	color: #9c6d48;
 }
 
 .cert-download-capture-mode .certificate-custom {
@@ -396,6 +553,7 @@ html.sherab-cert-mobile-webview .mobile-app-certificate-message a {
 	transform: none !important;
 	margin-bottom: 0 !important;
 	width: 1200px !important;
+	min-height: 848px !important;
 	max-width: none !important;
 	align-items: stretch !important;
 	box-shadow: none !important;
@@ -403,6 +561,7 @@ html.sherab-cert-mobile-webview .mobile-app-certificate-message a {
 
 .cert-download-capture-mode .cert-left {
 	align-self: stretch !important;
+	background-color: transparent !important;
 }
 
 .cert-download-capture-mode .wrapper-view,
@@ -545,9 +704,11 @@ html.sherab-cert-mobile-webview .mobile-app-certificate-message a {
 
 	.cert-left {
 		width: 38.33vw !important;
+		flex: 0 0 38.33vw !important;
+		background-color: transparent !important;
 	}
 
 	.cert-side-art-wrapper {
-		width: 500px !important;
+		width: 38.33vw !important;
 	}
 }

@@ -76,40 +76,89 @@
 
 <main class="certificate-custom sherab-themed-certificate">
   <div class="cert-container">
-	<div class="cert-left">
-      	<img src="${static.url('images/certificate-logo.png')}" alt="${platform_name}" class="cert-left-logo">
+    <!-- Corner ornaments -->
+    <div class="cert-corner cert-corner-tl" aria-hidden="true">
+      <svg viewBox="0 0 220 220" fill="none" stroke="#f0b484" stroke-width="4.6" stroke-linecap="square" stroke-linejoin="miter">
+        <path d="M 18 210 L 18 47.5 L 47.5 47.5 L 47.5 18 L 210 18" />
+        <rect x="18" y="18" width="20.5" height="20.5" />
+        <rect x="28" y="28" width="39" height="9.5" />
+        <rect x="28" y="28" width="9.5" height="39" />
+      </svg>
     </div>
+    <div class="cert-corner cert-corner-tr" aria-hidden="true">
+      <svg viewBox="0 0 220 220" fill="none" stroke="#f0b484" stroke-width="4.6" stroke-linecap="square" stroke-linejoin="miter">
+        <g transform="translate(220, 0) scale(-1, 1)">
+          <path d="M 18 210 L 18 47.5 L 47.5 47.5 L 47.5 18 L 210 18" />
+          <rect x="18" y="18" width="20.5" height="20.5" />
+          <rect x="28" y="28" width="39" height="9.5" />
+          <rect x="28" y="28" width="9.5" height="39" />
+        </g>
+      </svg>
+    </div>
+    <div class="cert-corner cert-corner-bl" aria-hidden="true">
+      <svg viewBox="0 0 220 220" fill="none" stroke="#f0b484" stroke-width="4.6" stroke-linecap="square" stroke-linejoin="miter">
+        <g transform="translate(0, 220) scale(1, -1)">
+          <path d="M 18 210 L 18 47.5 L 47.5 47.5 L 47.5 18 L 210 18" />
+          <rect x="18" y="18" width="20.5" height="20.5" />
+          <rect x="28" y="28" width="39" height="9.5" />
+          <rect x="28" y="28" width="9.5" height="39" />
+        </g>
+      </svg>
+    </div>
+    <div class="cert-corner cert-corner-br" aria-hidden="true">
+      <svg viewBox="0 0 220 220" fill="none" stroke="#f0b484" stroke-width="4.6" stroke-linecap="square" stroke-linejoin="miter">
+        <g transform="translate(220, 220) scale(-1, -1)">
+          <path d="M 18 210 L 18 47.5 L 47.5 47.5 L 47.5 18 L 210 18" />
+          <rect x="18" y="18" width="20.5" height="20.5" />
+          <rect x="28" y="28" width="39" height="9.5" />
+          <rect x="28" y="28" width="9.5" height="39" />
+        </g>
+      </svg>
+    </div>
+
+    <div class="cert-left"></div>
 
     <div class="cert-side-art-wrapper">
       	<img src="${static.url('images/certificate-side-asset.png')}" alt="Side Art" class="cert-side-art">
     </div>
 
     <div class="cert-right">
-		<div class="cert-header">
+		<div class="cert-top-content">
 			<div class="cert-logo-wrapper">
-				% if partner_logo_src:
-					<img src="${partner_logo_src}" alt="${partner_name}" class="cert-logo">
-				% elif partner_logo:
-					<img src="${partner_logo.url if getattr(partner_logo, 'url', None) else partner_logo}" alt="${partner_name}"
-						class="cert-logo">
-				% else:
-					<img src="${static.url('images/logo.png')}" alt="${platform_name}" class="cert-logo">
-				% endif
+				<img src="${static.url('images/certificate-logo.png')}" alt="${platform_name}" class="cert-top-logo">
 			</div>
 			<h1 class="cert-title">${_("CERTIFICATE")}</h1>
 			<h2 class="cert-subtitle">${_("OF COMPLETION")}</h2>
-			<p class="cert-presented">${_("Proudly Presented To")}</p>
-		</div>
 
-      	<div class="cert-name">${full_name}</div>
+			<div class="cert-name">${full_name}</div>
 
-		<div class="cert-description">
-			${_("Successfully completed and received a passing grade in")}
-			<div class="course-name">
-				${accomplishment_copy_course_name}
+			<div class="cert-divider" aria-hidden="true">
+				<span class="cert-divider-line"></span>
+				<span class="cert-divider-dot"></span>
+				<span class="cert-divider-line"></span>
 			</div>
-			${_("an online")} ${course_mode} ${_("course authorized by")} ${partner_name} and
-			offered through ${platform_name}.
+
+			<div class="cert-description">
+				<p class="cert-completion-lead">${_("Successfully completed and received a passing grade in")}</p>
+				<div class="course-name">
+					${accomplishment_copy_course_name}
+				</div>
+				<p class="cert-course-auth">
+					${_("an online")} ${course_mode} ${_("course authorized by")} ${partner_name} and
+					offered through ${platform_name}.
+				</p>
+			</div>
+
+			% if partner_logo_src or partner_logo:
+			<div class="cert-partner-wrapper">
+				% if partner_logo_src:
+					<img src="${partner_logo_src}" alt="${partner_name}" class="cert-partner-logo">
+				% elif partner_logo:
+					<img src="${partner_logo.url if getattr(partner_logo, 'url', None) else partner_logo}" alt="${partner_name}"
+						class="cert-partner-logo">
+				% endif
+			</div>
+			% endif
 		</div>
 
 		<div class="cert-signature">
@@ -133,17 +182,11 @@
 
       <div class="cert-footer">
         <div class="cert-issued">
-			<div class="cert-label">${_("VERIFIED CERTIFICATE")}</div>
-			<div class="cert-value">
-				${_("Issued")} ${certificate_date_issued}
-			</div>
+			<span class="cert-value">${certificate_date_issued}</span>
         </div>
-
+        <span class="cert-footer-separator" aria-hidden="true">&middot;</span>
         <div class="cert-id">
-			<div class="cert-label">${_("VALID CERTIFICATE ID")}</div>
-			<div class="cert-value">
-				${certificate_id_number}
-			</div>
+			<span class="cert-value" data-certificate-id="${certificate_id_number}">${certificate_id_number}</span>
         </div>
       </div>
 

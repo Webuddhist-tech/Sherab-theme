@@ -44,18 +44,20 @@
 			"  background-color: #fff !important;",
 			"}",
 			"html.sherab-cert-mobile-webview .sherab-themed-certificate .cert-left {",
-			"  background-color: #F36F2A !important;",
+			"  background-color: transparent !important;",
 			"}",
 			"html.sherab-cert-mobile-webview .sherab-themed-certificate .cert-right {",
 			"  background-color: #fff !important;",
 			"}",
 			"html.sherab-cert-mobile-webview .sherab-themed-certificate .cert-side-art,",
 			"html.sherab-cert-mobile-webview .sherab-themed-certificate .cert-logo,",
+			"html.sherab-cert-mobile-webview .sherab-themed-certificate .cert-top-logo,",
+			"html.sherab-cert-mobile-webview .sherab-themed-certificate .cert-partner-logo,",
 			"html.sherab-cert-mobile-webview .sherab-themed-certificate .signatory-img {",
 			"  filter: none !important;",
 			"}",
 			"html.sherab-cert-mobile-webview .sherab-themed-certificate .cert-left-logo {",
-			"  filter: brightness(0) invert(1) !important;",
+			"  display: none !important;",
 			"}"
 		].join("\n");
 
@@ -94,9 +96,9 @@
 			".certificate-custom { padding: 0 !important; background: transparent !important; overflow: visible !important; }",
 			".cert-container, .cert-container * { color-scheme: only light !important; forced-color-adjust: none !important; }",
 			".cert-container, .cert-right { background-color: #fff !important; }",
-			".cert-left { background-color: #F36F2A !important; }",
-			".cert-container, .cert-side-art, .cert-logo, .signatory-img { filter: none !important; }",
-			".cert-left-logo { filter: brightness(0) invert(1) !important; }"
+			".cert-left { background-color: transparent !important; }",
+			".cert-container, .cert-side-art, .cert-logo, .cert-top-logo, .cert-partner-logo, .signatory-img { filter: none !important; }",
+			".cert-left-logo { display: none !important; }"
 		].join("\n");
 
 		var doc = frame.contentDocument || frame.contentWindow.document;
