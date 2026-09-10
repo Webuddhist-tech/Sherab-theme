@@ -3,58 +3,124 @@
 <%namespace name='static' file='static_content.html'/>
 
 <%!
-import json
-from urllib.parse import urljoin #had to import it for the url of profile
-
+from urllib.parse import urljoin
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_image_urls_for_user
-##from openedx.core.djangoapps.user_api.accounts.toggles import should_redirect_to_order_history_microfrontend - hidden to resolve the module error
-from openedx.features.enterprise_support.utils import get_enterprise_learner_generic_name, get_enterprise_learner_portal
+from openedx.features.enterprise_support.utils import get_enterprise_learner_generic_name
 %>
 
 <%
-## This template should not use the target student's details when masquerading, see TNL-4895
 self.real_user = getattr(user, 'real_user', user)
 profile_image_url = get_profile_image_urls_for_user(self.real_user)['medium']
-
-## Check if the user has a profile image
 has_profile_image = getattr(self.real_user.profile, 'has_profile_image', False)
 
 username = self.real_user.username
-displayname = get_enterprise_learner_generic_name(request) or username
-enterprise_customer_portal = get_enterprise_learner_portal(request)
-## Enterprises with the learner portal enabled should not show order history, as it does
-## not apply to the learner's method of purchasing content.
-##should_show_order_history = should_redirect_to_order_history_microfrontend() and not enterprise_customer_portal - hidden due to the removal of module (removal of dependency)
+displayname = get_enterprise_learner_generic_name(request) or getattr(self.real_user.profile, 'name', username)
+email = self.real_user.email
 %>
 
-<div class="nav-item hidden-mobile nav-item-dropdown" tabindex="-1">
-    <div class="toggle-user-dropdown" role="button" aria-label=${_("Options Menu")} aria-expanded="false" tabindex="0" aria-controls="user-menu">
+<div class="nav-profile-wrap">
+    <button class="nav-profile" id="profileBtn" aria-label="${_('Your account')}" aria-haspopup="menu" aria-expanded="false" aria-controls="profileMenu">
+        <span class="nav-profile-initials" style="display:none;"></span>
         % if has_profile_image:
-            <img data-hj-suppress class="user-image-frame" src="${profile_image_url}" alt="">
+            <img class="nav-profile-img user-image-frame" src="${profile_image_url}" alt="" />
+            <svg class="nav-profile-fallback" style="display:none;" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
         % else:
-            <svg data-hj-suppress class="user-image-frame" width="24" height="24" viewBox="0 0 24 24" fill="#093055" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4.10255106,18.1351061 C4.7170266,16.0581859 8.01891846,14.4720277 12,14.4720277 C15.9810815,14.4720277 19.2829734,16.0581859 19.8974489,18.1351061 C21.215206,16.4412566 22,14.3122775 22,12 C22,6.4771525 17.5228475,2 12,2 C6.4771525,2 2,6.4771525 2,12 C2,14.3122775 2.78479405,16.4412566 4.10255106,18.1351061 Z M12,24 C5.372583,24 0,18.627417 0,12 C0,5.372583 5.372583,0 12,0 C18.627417,0 24,5.372583 24,12 C24,18.627417 18.627417,24 12,24 Z M12,13 C9.790861,13 8,11.209139 8,9 C8,6.790861 9.790861,5 12,5 C14.209139,5 16,6.790861 16,9 C16,11.209139 14.209139,13 12,13 Z" />
-            </svg>
+            <img class="nav-profile-img user-image-frame" src="" alt="" style="display:none;" />
+            <svg class="nav-profile-fallback" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
         % endif
-        <span class="sr-only">${_("Options Menu for:")}</span>
-        <span data-hj-suppress class="username">${displayname}</span>
-        <svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" role="img" aria-hidden="true" focusable="false" class="dropdown-arrow">
-            <path d="M7,4 L7,8 L11,8 L11,10 L5,10 L5,4 L7,4 Z" fill="currentColor" transform="translate(8.000000, 7.000000) rotate(-45.000000) translate(-8.000000, -7.000000)"></path>
-        </svg>
-    </div>
-    <div class="dropdown-user-menu hidden" aria-label=${_("More Options")} role="menu" id="user-menu" tabindex="-1">
-        ## replaced ${reverse('learner_profile', kwargs={'username': username})} with ${urljoin(settings.PROFILE_MICROFRONTEND_URL, f'{user.username}')} - to resolve the reversematch issue.
-        <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${urljoin(settings.PROFILE_MICROFRONTEND_URL, f'{user.username}')}" role="menuitem">${_("Profile")}</a></div>
-        <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${settings.ACCOUNT_MICROFRONTEND_URL}" role="menuitem">${_("Account")}</a></div>
-        <%doc>
-        % if should_show_order_history:
-            <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${settings.ORDER_HISTORY_MICROFRONTEND_URL}" role="menuitem">${_("Order History")}</a></div>
-        % endif
-        </%doc>
-        <div class="mobile-nav-item dropdown-item dropdown-nav-item signout-item"><a href="${reverse('logout')}" role="menuitem">${_("Sign Out")}</a></div>
+    </button>
+    <div class="nav-menu" id="profileMenu" role="menu" aria-labelledby="profileBtn">
+        <div class="nav-menu-id">
+            <span class="nav-menu-id-avatar nav-menu-id-initials" style="display:none;"></span>
+            % if has_profile_image:
+                <img class="nav-menu-id-avatar nav-menu-id-img user-image-frame" src="${profile_image_url}" alt="" />
+                <span class="nav-menu-id-avatar nav-menu-id-fallback" style="display:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span>
+            % else:
+                <img class="nav-menu-id-avatar nav-menu-id-img user-image-frame" src="" alt="" style="display:none;" />
+                <span class="nav-menu-id-avatar nav-menu-id-fallback"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span>
+            % endif
+            <span class="nav-menu-id-text">
+                <span class="nav-menu-id-name" id="user-display-name" data-mako-name="${displayname}">${displayname}</span>
+                <span class="nav-menu-id-email" id="user-display-email" data-mako-email="${email}">${email}</span>
+            </span>
+        </div>
+        <div class="nav-menu-sep"></div>
+        <a href="${urljoin(settings.PROFILE_MICROFRONTEND_URL, f'{user.username}')}" class="nav-menu-item" role="menuitem">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>${_("Profile")}</span>
+        </a>
+        <a href="${settings.ACCOUNT_MICROFRONTEND_URL}" class="nav-menu-item" role="menuitem">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>${_("Account")}</span>
+        </a>
+        <div class="nav-menu-sep"></div>
+        <a href="${reverse('logout')}" class="nav-menu-item nav-menu-signout" role="menuitem">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>${_("Sign Out")}</span>
+        </a>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    function getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length === 2) return decodeURIComponent(parts.pop().split(";").shift());
+    }
+    
+    try {
+        var userInfoStr = getCookie("edx-user-info");
+        if (userInfoStr) {
+            userInfoStr = userInfoStr.replace(/\\054/g, ",");
+            var userInfo = JSON.parse(userInfoStr);
+            
+            var nameEl = document.getElementById("user-display-name");
+            var emailEl = document.getElementById("user-display-email");
+            var mobileNameEl = document.getElementById("mobile-user-display-name");
+            var mobileEmailEl = document.getElementById("mobile-user-display-email");
+            
+            var nameStr = userInfo.name || userInfo.username || (nameEl ? nameEl.getAttribute("data-mako-name") : "") || "";
+            var emailStr = userInfo.email || (emailEl ? emailEl.getAttribute("data-mako-email") : "") || "";
+            
+            if(nameEl) nameEl.textContent = nameStr;
+            if(emailEl) emailEl.textContent = emailStr;
+            if(mobileNameEl) mobileNameEl.textContent = nameStr;
+            if(mobileEmailEl) mobileEmailEl.textContent = emailStr;
+            
+            var hasProfileImage = ${'true' if has_profile_image else 'false'};
+            
+            if (!hasProfileImage && nameStr) {
+                // Check if name contains only Latin characters (English) and basic punctuation
+                var isEnglishName = /^[A-Za-zÀ-ÖØ-öø-ÿ\s\.,\'-]+$/.test(nameStr);
+                
+                if (isEnglishName) {
+                    var initials = "";
+                    var words = nameStr.trim().split(/\s+/).filter(function(w){ return w.length > 0;});
+                    if (words.length > 1) {
+                        initials = words[0][0].toUpperCase() + words[words.length - 1][0].toUpperCase();
+                    } else if (words.length === 1) {
+                        initials = words[0][0].toUpperCase();
+                    }
+                    
+                    if (initials) {
+                        document.querySelectorAll('.nav-profile-initials, .nav-menu-id-initials').forEach(function(el) {
+                            el.textContent = initials;
+                            el.style.display = 'flex';
+                        });
+                        document.querySelectorAll('.nav-profile-fallback, .nav-menu-id-fallback').forEach(function(el) {
+                            el.style.display = 'none';
+                        });
+                    }
+                }
+            }
+        }
+    } catch(e) {
+        console.warn("Failed to parse user info cookie", e);
+    }
+});
+</script>

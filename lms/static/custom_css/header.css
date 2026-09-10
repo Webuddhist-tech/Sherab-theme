@@ -1,0 +1,811 @@
+/* header.css
+ *
+ * The LMS site header, kept in step with the MFE header so a visitor moving
+ * between the two never sees the bar change. Ported rule-for-rule from
+ * brand-openedx/paragon/_header.scss (the markup there lives in
+ * frontend-component-header/src/site-header/), with the Sass variables resolved
+ * to their literal values. Sections below follow that file's order, so a change
+ * made there can be found here by scrolling to the same heading.
+ *
+ * Two deliberate departures from the MFE:
+ *
+ * 1. The MFE mounts each dropdown only while it is open, so its resting state is
+ *    the visible one. Here the markup is server-rendered and always present, so
+ *    the closed state is a real state - `opacity: 0` plus `pointer-events: none`,
+ *    lifted by `.is-open` (toggled in header.html). The timing and transform are
+ *    the MFE's.
+ * 2. `!important` appears on the properties that edx-platform's own base
+ *    stylesheets set on bare `a` and `button` elements. Everything else relies on
+ *    the `.site-nav` scoping below for specificity.
+ *
+ * Scoping the link rules under `.site-nav` also keeps them off `.nav-link`
+ * elsewhere in the platform - program_marketing.html uses that class, and
+ * partners.css carries Bootstrap's `.nav-tabs .nav-link`.
+ */
+
+/* ---------------------------------------------------------------- shell */
+
+.site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    height: 64px;
+    padding: 0 16px;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E0D0B0;
+    font-family: 'DM Sans', 'Noto Serif Tibetan', "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    box-sizing: border-box;
+    /* The platform sets `antialiased` further up the page, which thins every
+       glyph in the bar and its menus - same colour as the MFE, but visibly
+       lighter next to it. The MFE leaves this at `auto`, so the header does
+       too. Inherited, so the menus pick it up from here. */
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
+    /* `position` can't be animated between sticky and static, so the bar stays
+       sticky and a transform carries it away instead - see the release rules. */
+    transform: translateY(0);
+    transition: transform 240ms ease;
+}
+
+/* Slides the bar out of view once the page footer scrolls in, so the header
+   leaves with the page rather than staying pinned over it. */
+.site-nav.header-releases-sticky {
+    transform: translateY(-100%);
+}
+
+/* Set when the release wasn't caused by the visitor's own scrolling - most
+   plausibly the footer's position being re-measured while content loaded.
+   Animating that reads as the bar moving for no reason; snapping doesn't. */
+.site-nav.header-releases-sticky-instant {
+    transition: none;
+}
+
+.site-nav *,
+.site-nav *::before,
+.site-nav *::after {
+    box-sizing: border-box;
+}
+
+.site-nav a,
+.site-nav button {
+    font-family: 'DM Sans', 'Noto Serif Tibetan', "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.site-nav a {
+    text-decoration: none !important;
+}
+
+/* Matches the shared 24x24 stroke wrapper the MFE draws every header glyph
+   with, so the line ends read the same rounded way. */
+.site-nav svg {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+@media (min-width: 601px) {
+    .site-nav {
+        padding: 0 24px;
+    }
+}
+
+/* Above these widths the bar tracks the page content column instead of a fixed
+   inset, so its edges line up with the content beneath. */
+@media (min-width: 1000px) {
+    .site-nav {
+        padding: 0 max(48px, calc((100% - 1120px) / 2));
+    }
+}
+
+@media (min-width: 1600px) {
+    .site-nav {
+        padding: 0 max(48px, calc((100% - 1360px) / 2));
+    }
+}
+
+@media (min-width: 2000px) {
+    .site-nav {
+        padding: 0 max(48px, calc((100% - 1480px) / 2));
+    }
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-width: 0;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------- brand lockup */
+
+/* Logo and wordmark are one link: clicking either goes home. Shrinkable, so a
+   long site name gives way instead of colliding with the links. */
+.nav-brand,
+.nav-brand-lock {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    overflow: hidden;
+    padding: 8px;
+    margin-left: -8px;
+    border-radius: 8px;
+    transition: background 150ms ease-out, opacity 150ms ease-out;
+}
+
+.nav-brand:hover,
+.nav-brand-lock:hover {
+    background: #F0E4CC;
+}
+
+.nav-brand:active,
+.nav-brand-lock:active {
+    opacity: 0.75;
+}
+
+.nav-brand-logo {
+    display: block;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.nav-brand-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #1C0A00;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+}
+
+/* The active-page marker underlines the wordmark only, never the logo, so the
+   inset clears the logo width plus the lockup gap and the wrapper padding. */
+.nav-brand-active::after {
+    content: '';
+    position: absolute;
+    left: 48px;
+    right: 8px;
+    bottom: 1px;
+    height: 2px;
+    border-radius: 2px;
+    background: #E8873A;
+}
+
+/* ---------------------------------------------------------------- nav links */
+
+.site-nav .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+/* Unlike the icon buttons and menu rows, a nav link carries no hover background -
+   only the text darkens and the underline animates in. The border-radius is there
+   purely so the focus-visible outline further down renders rounded. */
+.site-nav .nav-link {
+    position: relative;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #5A2D0C !important;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.55;
+    white-space: nowrap;
+    transition: color 150ms ease-out;
+}
+
+.site-nav .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 1px;
+    height: 2px;
+    border-radius: 2px;
+    background: #E8873A;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 150ms ease-out;
+}
+
+.site-nav .nav-link:hover {
+    color: #1C0A00 !important;
+}
+
+.site-nav .nav-link:hover::after {
+    transform: scaleX(1);
+}
+
+.site-nav .nav-link:active {
+    color: #1C0A00 !important;
+}
+
+.site-nav .nav-link:active::after {
+    transform: scaleX(1);
+    background: #6B3300;
+}
+
+.site-nav .nav-link-active {
+    color: #1C0A00 !important;
+    font-weight: 600;
+}
+
+.site-nav .nav-link-active::after {
+    transform: scaleX(1);
+}
+
+/* ---------------------------------------------------------------- icon buttons */
+
+.nav-locale-wrap,
+.nav-profile-wrap,
+.nav-burger-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* The burger only exists below the collapse breakpoint. */
+.nav-burger-wrap {
+    display: none;
+}
+
+.nav-locale {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 9999px;
+    background: none !important;
+    color: #5A2D0C !important;
+    cursor: pointer;
+    flex-shrink: 0;
+    outline: none;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: background 150ms ease-out, color 150ms ease-out;
+}
+
+.nav-locale svg {
+    width: 22px;
+    height: 22px;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.8px !important;
+}
+
+.nav-locale svg circle,
+.nav-locale svg path {
+    fill: none !important;
+}
+
+.nav-locale:hover {
+    background: #F0E4CC !important;
+    color: #1C0A00 !important;
+}
+
+.nav-locale:active {
+    background: #E0D0B0 !important;
+}
+
+.nav-locale[aria-expanded="true"] {
+    background: #F0E4CC !important;
+    color: #E8873A !important;
+}
+
+.nav-burger svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* The border lives here, on the button, not on the photo inside it. Putting it on
+   the photo means two independently-rounded shapes sit almost but not quite on top
+   of each other, and their separately anti-aliased edges leave a hairline gap where
+   the saffron background below shows through as a thin orange line. One rounded
+   shape, clipped once by `overflow: hidden`, has no seam to leave. */
+.nav-profile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    width: 44px;
+    height: 44px;
+    padding: 0 !important;
+    border: 2px solid #F0E4CC !important;
+    border-radius: 9999px;
+    background: #E8873A !important;
+    color: #1C0A00 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    flex-shrink: 0;
+    outline: none;
+    box-shadow: none;
+    text-shadow: none !important;
+    transition: box-shadow 150ms ease-out;
+}
+
+/* Solid, not alpha-blended: the border above is fully opaque sand, and a
+   semi-transparent ring here would blend to a visibly different shade right where
+   the two meet. Hover and open are told apart by ring thickness, not opacity. */
+.nav-profile:hover {
+    box-shadow: 0 0 0 3px #F0E4CC;
+}
+
+.nav-profile[aria-expanded="true"] {
+    box-shadow: 0 0 0 5px #F0E4CC;
+}
+
+.nav-profile:hover,
+.nav-profile:active,
+.nav-profile:focus {
+    background: #E8873A !important;
+    color: #1C0A00 !important;
+    text-shadow: none !important;
+}
+
+/* Just fills the button - the border and the round clip both belong to
+   .nav-profile above, not to this image. */
+.nav-profile-img,
+.nav-profile-photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nav-profile-initials,
+.nav-profile-fallback {
+    align-items: center;
+    justify-content: center;
+}
+
+/* ---------------------------------------------------------------- auth buttons */
+
+/* Scoped like the nav links above: the platform styles header anchors at a single
+   class, which would otherwise set these buttons to 16px/400 and leave them ~6px
+   shorter than the MFE's. */
+.site-nav .nav-auth {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.55;
+    white-space: nowrap;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out;
+}
+
+.site-nav .nav-auth-register {
+    border: 2px solid #6B3300;
+    background: none;
+    color: #6B3300 !important;
+}
+
+.site-nav .nav-auth-register:hover {
+    border-color: #8B4400;
+    background: rgba(107, 51, 0, 0.08);
+    color: #8B4400 !important;
+}
+
+.site-nav .nav-auth-register:active {
+    border-color: #4F2500;
+    background: rgba(107, 51, 0, 0.16);
+    color: #4F2500 !important;
+}
+
+/* Saffron never carries white label text; the accent contrast token is espresso. */
+.site-nav .nav-auth-signin {
+    border: 2px solid transparent;
+    background: #E8873A;
+    color: #1C0A00 !important;
+}
+
+.site-nav .nav-auth-signin:hover {
+    background: #C9712A;
+    color: #1C0A00 !important;
+}
+
+.site-nav .nav-auth-signin:active {
+    background: #B05E1A;
+}
+
+/* ---------------------------------------------------------------- dropdown shell */
+
+.site-nav .nav-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    left: auto;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 256px;
+    /* Matches the border-radius below, not the 8px step: padding smaller than the
+       corner radius leaves a sliver where the curve cuts into the content box, so a
+       row flush against the edge has its icon visibly touch the curve. */
+    padding: 12px;
+    border: 1px solid #E0D0B0;
+    border-radius: 12px;
+    background: #FFFFFF;
+    box-shadow: 0 12px 32px rgba(28, 10, 0, 0.13);
+    transform-origin: top right;
+    /* Every dropdown anchors below the same fixed-height bar at every width, so the
+       cap belongs here rather than in the mobile block: a long list (the language
+       menu, most plausibly) would otherwise grow past the viewport with no way to
+       reach what's below the fold. */
+    max-height: calc(100vh - 64px - 32px);
+    overflow-y: auto;
+    /* Closed state; see the file header for why this differs from the MFE. */
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+    pointer-events: none;
+    transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.site-nav .nav-menu.is-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.site-nav .nav-menu-lang {
+    min-width: 192px;
+}
+
+/* The burger trigger sits on the right of the bar, same side as the locale and
+   profile triggers, so this dropdown needs no anchor override of its own - it
+   inherits the base rule's right edge. Only its width differs. */
+.site-nav .nav-menu-main {
+    min-width: 240px;
+}
+
+/* The language rows are wrapped in a POST form the platform's language-selector.js
+   needs. `display: contents` drops the form from the box tree so those rows become
+   direct flex children of the shell above, and pick up its 2px gap the way the
+   MFE's flat markup does. */
+#language-settings-form,
+#language-settings-form-mobile {
+    display: contents;
+}
+
+/* ---------------------------------------------------------------- dropdown rows */
+
+.nav-menu-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #5A2D0C !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    /* Flagged, like .lang-native below: the platform's base stylesheet sets a
+       16px line-height on menu links, which shortens the row by ~6px. */
+    line-height: 1.55 !important;
+    /* The language rows are <button>s while the rest are <a>s, and the platform
+       tracks button labels out by 1px - which only the language list inherited,
+       leaving the two halves of the same menu in visibly different widths. The
+       MFE has no tracking on any row. */
+    letter-spacing: normal;
+    text-align: left;
+    cursor: pointer;
+    margin: 0;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: background 150ms ease-out, color 150ms ease-out;
+}
+
+.nav-menu-item svg {
+    flex-shrink: 0;
+    color: #8B6A50;
+    transition: color 150ms ease-out;
+}
+
+.nav-menu-item:hover {
+    background: #F0E4CC !important;
+    color: #1C0A00 !important;
+}
+
+.nav-menu-item:active {
+    background: #E0D0B0;
+}
+
+.nav-menu-item[aria-current="page"],
+.nav-menu-item[aria-checked="true"] {
+    background: #F0E4CC;
+    color: #1C0A00 !important;
+    font-weight: 600 !important;
+}
+
+.nav-menu-item[aria-current="page"] svg,
+.nav-menu-item[aria-checked="true"] svg {
+    color: #E8873A;
+}
+
+/* The selected marker sits inside the shell padding, vertically centred on the row. */
+.nav-menu-item[aria-current="page"]::before,
+.nav-menu-item[aria-checked="true"]::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    background: #E8873A;
+    transform: translateY(-50%);
+}
+
+.nav-menu-sep {
+    height: 1px;
+    margin: 4px 8px;
+    background: #F0E4CC;
+}
+
+.nav-menu-label {
+    padding: 8px 12px 4px;
+    color: #8B6A50;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Sign out is deliberately set apart from the rest of the menu. */
+.nav-menu-signout {
+    color: #8A5A3A !important;
+}
+
+.nav-menu-signout svg {
+    color: #C08A60;
+}
+
+.nav-menu-signout:hover {
+    background: #FBEFE6 !important;
+    color: #7A3F1E !important;
+}
+
+.nav-menu-signout:hover svg {
+    color: #7A3F1E;
+}
+
+/* ---------------------------------------------------------------- identity block */
+
+.nav-menu-id {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+}
+
+/* Border and round clip belong here, on the one shape, for the same reason as
+   .nav-profile above: a border on the image instead leaves a hairline gap between
+   two separately-rounded edges. */
+.nav-menu-id-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border: 1.5px solid #F0E4CC !important;
+    border-radius: 9999px;
+    background: #E8873A !important;
+    color: #1C0A00 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px;
+    padding: 0;
+}
+
+/* When the photo sits inside the sized span, it fills it. */
+.nav-menu-id-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* When the photo *is* the avatar - the logged-in menu puts both classes on the
+   same <img> - it already has the 32px box from the rule above and needs only
+   the crop. A `width: 100%` here would resolve against `.nav-menu-id` instead,
+   stretching the photo across the whole row and pushing the name and email out
+   of the menu entirely. */
+img.nav-menu-id-avatar {
+    object-fit: cover;
+}
+
+.nav-menu-id-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.nav-menu-id-name,
+.nav-menu-id-email {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+}
+
+.nav-menu-id-name {
+    color: #1C0A00;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+.nav-menu-id-email {
+    color: #8B6A50;
+    font-size: 12px !important;
+}
+
+/* ---------------------------------------------------------------- language rows */
+
+/* The rows are <button>s inside the POST form, so they need the platform's button
+   chrome cleared before they read as menu rows. */
+.lang-item {
+    width: 100%;
+    justify-content: flex-start;
+}
+
+/* Native names only; the Tibetan and Chinese faces are appended so those scripts
+   render even though the brand UI face does not cover them. */
+.lang-native {
+    font-family: 'DM Sans', 'Noto Serif Tibetan', "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Noto Sans SC", sans-serif;
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+    white-space: nowrap;
+}
+
+/* Present on every row, not just the selected one, so each row is the same height
+   and the list doesn't reflow as the selection moves. */
+.lang-tick {
+    flex-shrink: 0;
+    margin-left: auto;
+    padding-left: 12px;
+    opacity: 0;
+}
+
+.nav-menu-item[aria-checked="true"] .lang-tick {
+    opacity: 1;
+}
+
+/* The tick keeps the saffron of a selected row rather than the muted icon colour. */
+.nav-menu-item .lang-tick {
+    color: #E8873A;
+}
+
+/* ---------------------------------------------------------------- focus */
+
+/* Bar controls take the brand ring on the outside. Menu rows take the same ring
+   inset, because the shell's padding is narrower than the ring offset and an
+   outside ring would be clipped at the shell edge. */
+.nav-brand:focus,
+.nav-brand-lock:focus,
+.site-nav .nav-link:focus,
+.nav-locale:focus,
+.nav-profile:focus,
+.site-nav .nav-auth:focus,
+.nav-menu-item:focus {
+    outline: none;
+}
+
+.nav-brand:focus-visible,
+.nav-brand-lock:focus-visible,
+.site-nav .nav-link:focus-visible,
+.nav-locale:focus-visible,
+.nav-profile:focus-visible,
+.site-nav .nav-auth:focus-visible {
+    outline: 3px solid #0C4E68 !important;
+    outline-offset: 3px;
+}
+
+.nav-menu-item:focus-visible {
+    outline: 3px solid #0C4E68 !important;
+    outline-offset: -3px;
+}
+
+/* ---------------------------------------------------------------- collapse */
+
+/* Rows that only belong in the burger menu. The desktop bar renders the same
+   destinations as its own controls, so these are hidden until the bar collapses. */
+.nav-only-sm {
+    display: none !important;
+}
+
+@media (max-width: 600px) {
+    /* `.nav-links` and `.nav-menu-main` are matched at two classes above, so their
+       overrides here need the same `.site-nav` prefix to win at equal specificity. */
+    .site-nav .nav-links,
+    .nav-locale-wrap,
+    .nav-profile-wrap,
+    .nav-auth {
+        display: none !important;
+    }
+
+    .nav-burger-wrap {
+        display: block;
+    }
+
+    /* Every `.nav-actions` child is hidden at this width, so the element is empty
+       and only its share of the bar's gap is left - which would push `.nav-left`,
+       and with it the burger and its dropdown, 8px in from the padding edge the
+       MFE's burger sits flush against. `.nav-left` spans the bar here and spaces
+       its own children, so the bar needs no gap of its own. */
+    .site-nav {
+        gap: 0;
+    }
+
+    /* The burger is the first child of `.nav-left` rather than the last child of
+       `.nav-actions`, so the row is reversed to put it on the right - same side as
+       the locale and profile triggers it stands in for. */
+    .nav-left {
+        width: 100%;
+        justify-content: space-between;
+        flex-direction: row-reverse;
+        gap: 0;
+    }
+
+    .nav-menu-main .nav-only-sm {
+        display: flex !important;
+    }
+
+    .nav-menu-main .nav-menu-sep.nav-only-sm,
+    .nav-menu-main .nav-menu-label.nav-only-sm {
+        display: block !important;
+    }
+
+    /* max-height and overflow-y live on the shared shell rule above; only the
+       narrower width is specific to this variant. */
+    .site-nav .nav-menu-main {
+        min-width: min(292px, calc(100vw - 32px));
+    }
+
+    .nav-brand-name {
+        font-size: clamp(14px, 4.4vw, 18px);
+    }
+}
+
+/* A tighter gap at tablet widths than the full-width bar uses, so the nav links
+   (which never shrink, unlike .nav-brand) have more room before crowding the
+   wordmark. The wordmark needs no hiding here: it already shrinks and truncates
+   with an ellipsis before the links would be pushed off. */
+@media (min-width: 601px) and (max-width: 899px) {
+    .nav-left {
+        gap: 16px;
+    }
+}

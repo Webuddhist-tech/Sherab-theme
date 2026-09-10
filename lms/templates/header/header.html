@@ -43,7 +43,7 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
 % endif
 
 
-<header class="global-header ${'slim' if course else ''}">
+<nav class="site-nav">
     % if settings.FEATURES.get('ENABLE_COOKIE_POLICY_BANNER', use_cookie_banner):
         ${static.renderReact(
             component="CookiePolicyBanner",
@@ -51,22 +51,147 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
             props={}
         )}
     % endif
-    <div class="main-header">
-        <%include file="navbar-logo-header.html" args="online_help_token=online_help_token"/>
-        <div class="hamburger-menu" role="button" aria-label=${_("Options Menu")} aria-expanded="false" aria-controls="mobile-menu" tabindex="0">
-            <span class="line"></span>
-            <span class="line"></span>
-            <span class="line"></span>
-            <span class="line"></span>
-        </div>
-        % if user.is_authenticated:
-            <%include file="navbar-authenticated.html" args="online_help_token=online_help_token"/>
-        % else:
-            <%include file="navbar-not-authenticated.html" args="online_help_token=online_help_token"/>
-        % endif
-    </div>
-    <div class="mobile-menu hidden" aria-label=${_("More Options")} role="menu" id="mobile-menu"></div>
-</header>
+
+    % if user.is_authenticated:
+        <%include file="navbar-authenticated.html" args="online_help_token=online_help_token"/>
+    % else:
+        <%include file="navbar-not-authenticated.html" args="online_help_token=online_help_token"/>
+    % endif
+</nav>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    function navBind(btnId, menuId) {
+        var btn = document.getElementById(btnId);
+        var menu = document.getElementById(menuId);
+        if (!btn || !menu) return;
+        
+        var items = Array.prototype.slice.call(menu.querySelectorAll('.nav-menu-item, .lang-item'));
+        function isOpen() { return menu.classList.contains('is-open'); }
+        function setOpen(open) {
+            menu.classList.toggle('is-open', open);
+            btn.setAttribute('aria-expanded', String(open));
+            if (open && items.length > 0) items[0].focus();
+        }
+        
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var nx = !isOpen();
+            document.querySelectorAll('.nav-menu.is-open').forEach(function(m) {
+                if (m !== menu) {
+                    m.classList.remove('is-open');
+                    var b = document.querySelector('[aria-controls="' + m.id + '"]');
+                    if (b) b.setAttribute('aria-expanded', 'false');
+                }
+            });
+            setOpen(nx);
+        });
+        
+        document.addEventListener('click', function(e) {
+            if (isOpen() && !menu.contains(e.target) && !btn.contains(e.target)) {
+                setOpen(false);
+            }
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isOpen()) {
+                setOpen(false);
+                btn.focus();
+            }
+        });
+        
+        menu.addEventListener('keydown', function(e) {
+            var idx = items.indexOf(document.activeElement);
+            if (e.key === 'ArrowDown') { e.preventDefault(); items[(idx + 1) % items.length].focus(); }
+            if (e.key === 'ArrowUp') { e.preventDefault(); items[(idx - 1 + items.length) % items.length].focus(); }
+        });
+    }
+
+    navBind('navBtn', 'navMenu');
+    navBind('localeBtn', 'localeMenu');
+    navBind('profileBtn', 'profileMenu');
+
+    // Releases the sticky header once the footer scrolls into view, so the bar
+    // leaves with the page instead of sitting pinned on top of it. Mirrors
+    // useReleaseNearFooter in frontend-component-header.
+    (function releaseNearFooter() {
+        var nav = document.querySelector('.site-nav');
+        var footer = document.querySelector('footer');
+        if (!nav || !footer) return;
+
+        var ticking = false;
+        // A release the visitor didn't cause - most plausibly content loading in
+        // and moving the footer - snaps instead of animating, since animating it
+        // looks like the header sliding about for no reason.
+        var pendingInstant = true;
+        var hasUserInteracted = false;
+
+        function flush() {
+            ticking = false;
+            var instant = hasUserInteracted ? false : pendingInstant;
+            pendingInstant = true;
+            var top = footer.getBoundingClientRect().top;
+            // Where the footer sits in the document, not in the viewport. On a
+            // page short enough that the footer already fits on the first screen
+            // - the wishlist with nothing in it, say - the header is covering
+            // nothing, so releasing it would just delete the header from a page
+            // the visitor hasn't even scrolled. Those pages never release.
+            var reachableOnlyByScrolling = top + window.scrollY >= window.innerHeight;
+            var inView = reachableOnlyByScrolling && top < window.innerHeight;
+            nav.classList.toggle('header-releases-sticky-instant', instant);
+            nav.classList.toggle('header-releases-sticky', inView);
+        }
+
+        function scheduleCheck(instant) {
+            if (!instant) pendingInstant = false;
+            if (!ticking) {
+                ticking = true;
+                window.requestAnimationFrame(flush);
+            }
+        }
+
+        function onUserInteraction() {
+            hasUserInteracted = true;
+            scheduleCheck(false);
+        }
+
+        flush();
+        window.addEventListener('scroll', onUserInteraction, { passive: true });
+        window.addEventListener('resize', onUserInteraction);
+        // Catches content-height changes that fire neither scroll nor resize.
+        if (typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(function() { scheduleCheck(true); }).observe(document.body);
+        }
+    })();
+
+    
+    // Desktop vs Mobile language submission
+    var langItems = document.querySelectorAll('.lang-item');
+    langItems.forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            var code = this.dataset.code || this.getAttribute('data-code');
+            
+            // Visually mark this item as active immediately to prevent flickering while the page reloads
+            document.querySelectorAll('.lang-item').forEach(function(el) {
+                el.setAttribute('aria-checked', 'false');
+            });
+            this.setAttribute('aria-checked', 'true');
+            
+            // Update hidden select and trigger jQuery event for language-selector.js
+            var select = document.getElementById('settings-language-value');
+            if (select) {
+                select.value = code;
+                if (window.jQuery) {
+                    $('#settings-language-value').trigger('change');
+                } else {
+                    select.dispatchEvent(new Event('change'));
+                }
+            }
+        });
+    });
+});
+</script>
 
 % if course:
 <!--[if lte IE 9]>

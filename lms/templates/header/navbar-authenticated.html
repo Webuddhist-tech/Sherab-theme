@@ -5,16 +5,20 @@
 <%namespace name='static' file='../static_content.html'/>
 <%namespace file='../main.html' import="login_query"/>
 <%!
+from urllib.parse import urljoin
 from django.urls import reverse
 from django.utils.translation import gettext as _
-from openedx.core.djangoapps.lang_pref.api import header_language_selector_is_enabled, released_languages
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+from openedx.core.djangoapps.lang_pref.api import header_language_selector_is_enabled, released_languages
+from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_image_urls_for_user
 %>
 
 <%
   show_explore_courses = settings.FEATURES.get('COURSES_ARE_BROWSABLE')
+  show_sysadmin_dashboard = settings.FEATURES.get('ENABLE_SYSADMIN_DASHBOARD','') and user.is_staff
   self.real_user = getattr(user, 'real_user', user)
-  enable_help_link = settings.FEATURES.get('ENABLE_HELP_LINK')
+  profile_image_url = get_profile_image_urls_for_user(self.real_user)['medium']
+  has_profile_image = getattr(self.real_user.profile, 'has_profile_image', False)
 
   support_link = configuration_helpers.get_value('SUPPORT_SITE_LINK', settings.SUPPORT_SITE_LINK)
   doc_link = get_online_help_info(online_help_token)['doc_url']
@@ -27,78 +31,138 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
     help_link = doc_link
 %>
 
-<div class="nav-links">
-  <div class="main">
-      <div class="mobile-nav-item hidden-mobile nav-item nav-tab">
-        <a class="${'active ' if reverse('dashboard') == request.path else ''}tab-nav-link" href="${reverse('dashboard')}"
-             aria-current="${'page' if reverse('dashboard') == request.path else 'false'}">
-             ${_("Dashboard")}
-        </a>
-      </div>
+<div class="nav-left">
+    <div class="nav-burger-wrap">
+        <button class="nav-locale nav-burger" id="navBtn" aria-label="${_('Main menu')}" title="${_('Menu')}" aria-haspopup="menu" aria-expanded="false" aria-controls="navMenu">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        </button>
+        <div class="nav-menu nav-menu-main" id="navMenu" role="menu" aria-labelledby="navBtn">
+            <a href="${reverse('dashboard')}" class="nav-menu-item" role="menuitem">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                <span>${_("Dashboard")}</span>
+            </a>
+            % if show_explore_courses:
+            <a href="/courses" class="nav-menu-item" role="menuitem">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.6 13.6 7.8 16.2 10.4 10.4 16.2 7.8"/></svg>
+                <span>${_("Discover new")}</span>
+            </a>
+            % endif
+            <!-- WISHLIST LINK (hamburger menu)-->
+            <a href="/wishlist" class="nav-menu-item" role="menuitem">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+                <span>${_("Wishlist")}</span>
+            </a>
+            % if show_sysadmin_dashboard:
+            <a href="${reverse('sysadmin')}" class="nav-menu-item" role="menuitem">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                <span>${_("Sysadmin")}</span>
+            </a>
+            % endif
 
-      % if show_program_listing:
-        <div class="mobile-nav-item hidden-mobile nav-item nav-tab">
-          <a class="${'active ' if reverse('program_listing_view') in request.path else ''}tab-nav-link" href="${reverse('program_listing_view')}"
-             aria-current="${'page' if reverse('program_listing_view') == request.path else 'false'}">
-             ${_("Programs")}
-          </a>
-        </div>
-      % endif
-      % if show_explore_courses:
-      <div class="mobile-nav-item hidden-mobile nav-item nav-tab">
-          <a class="tab-nav-link discover-new-link ${'active ' if marketing_link('COURSES') == request.path else ''}" href="${marketing_link('COURSES')}"
-             aria-current="${'page' if '/courses' in request.path else 'false'}">
-             ${_('Discover New')}
-          </a>
-      </div>
-    % endif
-      <div class="mobile-nav-item hidden-mobile nav-item nav-tab">
-        <a class="${'active ' if reverse('wishlist:wishlist-view') == request.path else ''}tab-nav-link" href="${reverse('wishlist:wishlist-view')}"
-             aria-current="${'page' if reverse('wishlist:wishlist-view') == request.path else 'false'}">
-             ${_("Wishlist")}
-        </a>
-      </div>
+            % if header_language_selector_is_enabled():
+                <% languages = released_languages() %>
+                % if len(languages) > 1:
+                    <div class="nav-menu-sep nav-only-sm"></div>
+                    <div class="nav-menu-label nav-only-sm">${_('Language')}</div>
+                    <form action="/i18n/setlang/" method="post" id="language-settings-form-mobile">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}">
+                        % for language in languages:
+                            <button type="button" class="nav-menu-item lang-item nav-only-sm" role="menuitemradio" aria-checked="${'true' if language[0] == LANGUAGE_CODE else 'false'}" data-code="${language[0]}">
+                                <span class="lang-native">${language[1].replace(' (Tibetan)', '')}</span>
+                                <svg class="lang-tick" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </button>
+                        % endfor
+                        <input type="hidden" name="language" value="${LANGUAGE_CODE}">
+                    </form>
+                % endif
+            % endif
 
+            <div class="nav-menu-sep nav-only-sm"></div>
+            <div class="nav-menu-id nav-only-sm">
+                % if has_profile_image:
+                    <img class="nav-menu-id-avatar nav-menu-id-img" src="${profile_image_url}" alt="">
+                % else:
+                    <span class="nav-menu-id-avatar nav-menu-id-initials" style="display:none;"></span>
+                    <div class="nav-menu-id-avatar nav-menu-id-fallback" style="display: flex;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                % endif
+                <span class="nav-menu-id-text">
+                    <span class="nav-menu-id-name" id="mobile-user-display-name"></span>
+                    <span class="nav-menu-id-email" id="mobile-user-display-email"></span>
+                </span>
+            </div>
+            
+            <a href="${urljoin(settings.PROFILE_MICROFRONTEND_URL, f'{user.username}')}" class="nav-menu-item nav-only-sm" role="menuitem">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>${_("Profile")}</span>
+            </a>
+            
+            <a href="${settings.ACCOUNT_MICROFRONTEND_URL}" class="nav-menu-item nav-only-sm" role="menuitem">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>${_("Account")}</span>
+            </a>
 
-      % if settings.COMMUNITY_FORUM_URL:
-        <div class="mobile-nav-item hidden-mobile nav-item nav-tab">
-            <a class="tab-nav-link discover-new-link" href="${settings.COMMUNITY_FORUM_URL}" target="_blank">
-               ${_('Community Forum')}
+            <div class="nav-menu-sep nav-only-sm"></div>
+            <a href="${reverse('logout')}" class="nav-menu-item nav-menu-signout nav-only-sm" role="menuitem">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span>${_("Sign Out")}</span>
             </a>
         </div>
-      % endif
-  </div>
-
-  <div class="secondary">
-    <div class="mobile-nav-item hidden-mobile nav-item nav-tab">
-      % if header_language_selector_is_enabled():
-        <% languages = released_languages() %>
-          % if len(languages) > 1:
-            <form action="/i18n/setlang/" method="post" class="settings-language-form authenticated-settings-language-form" id="language-settings-form">
-                <input type="hidden" id="csrf_token" name="csrfmiddlewaretoken" value="${csrf_token}">
-                % if user.is_authenticated:
-                    <input title="preference api" type="hidden" class="url-endpoint" value="${reverse('preferences_api', kwargs={'username': user.username})}" data-user-is-authenticated="true">
-                % else:
-                    <input title="session update url" type="hidden" class="url-endpoint" value="${reverse('update_language')}" data-user-is-authenticated="false">
-                % endif
-                  <div class="language-selector-main">
-                    <i class="fa-solid fa-globe fa-2x globe-icon"></i>
-                    <label><span class="sr">${_("Choose Language")}</span>
-                    <select class="input select language-selector" id="settings-language-value" name="language">
-                      % for language in languages:
-                        % if language[0] == LANGUAGE_CODE:
-                            <option value="${language[0]}" selected="selected">${language[1]}</option>
-                        % else:
-                            <option value="${language[0]}" >${language[1]}</option>
-                        % endif
-                      % endfor
-                    </select>
-                    </label>
-                  </div>
-            </form>
-          % endif
-      % endif
     </div>
+    
+    <%include file="navbar-logo-header.html" args="online_help_token=online_help_token"/>
+    
+    <div class="nav-links">
+        <a href="${reverse('dashboard')}" class="nav-link ${'nav-link-active' if reverse('dashboard') == request.path else ''}">${_("Dashboard")}</a>
+        % if show_explore_courses:
+            <a href="/courses" class="nav-link ${'nav-link-active' if '/courses' in request.path else ''}">${_("Discover new")}</a>
+        % endif
+        <!-- WISHLIST LINK -->
+        <a href="/wishlist" class="nav-link ${'nav-link-active' if '/wishlist' in request.path else ''}">${_("Wishlist")}</a>
+
+        % if show_sysadmin_dashboard:
+            <a href="${reverse('sysadmin')}" class="nav-link">${_("Sysadmin")}</a>
+        % endif
+    </div>
+</div>
+
+<div class="nav-actions">
+    % if header_language_selector_is_enabled():
+        <% languages = released_languages() %>
+        % if len(languages) > 1:
+            <div class="nav-locale-wrap">
+                <button class="nav-locale" id="localeBtn" aria-label="${_('Change language')}" title="${_('Change language')}" aria-haspopup="menu" aria-expanded="false" aria-controls="localeMenu">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15.3 15.3 0 0 1 4 9 15.3 15.3 0 0 1-4 9 15.3 15.3 0 0 1-4-9 15.3 15.3 0 0 1 4-9z"/></svg>
+                </button>
+                <div class="nav-menu nav-menu-lang" id="localeMenu" role="menu" aria-labelledby="localeBtn">
+                    <div class="nav-menu-label">${_('Language')}</div>
+                    <form action="/i18n/setlang/" method="post" class="settings-language-form authenticated-settings-language-form" id="language-settings-form">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}">
+                        % if user.is_authenticated:
+                            <input title="preference api" type="hidden" class="url-endpoint" value="${reverse('preferences_api', kwargs={'username': user.username})}" data-user-is-authenticated="true">
+                        % else:
+                            <input title="session update url" type="hidden" class="url-endpoint" value="${reverse('update_language')}" data-user-is-authenticated="false">
+                        % endif
+                        <select id="settings-language-value" name="language" style="display: none;">
+                            % for language in languages:
+                                <option value="${language[0]}" ${'selected="selected"' if language[0] == LANGUAGE_CODE else ''}>${language[1]}</option>
+                            % endfor
+                        </select>
+                        % for language in languages:
+                            <button type="button" class="nav-menu-item lang-item" role="menuitemradio" aria-checked="${'true' if language[0] == LANGUAGE_CODE else 'false'}" data-code="${language[0]}">
+                                <span class="lang-native">${language[1].replace(' (Tibetan)', '')}</span>
+                                <svg class="lang-tick" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </button>
+                        % endfor
+                    </form>
+                </div>
+            </div>
+        % endif
+    % endif
+
     <%include file="user_dropdown.html"/>
-  </div>
 </div>
