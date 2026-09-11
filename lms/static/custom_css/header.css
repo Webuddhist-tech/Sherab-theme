@@ -341,7 +341,7 @@
     cursor: pointer;
     flex-shrink: 0;
     outline: none;
-    box-shadow: none;
+    box-shadow: 0 0 0 0 #F0E4CC;
     text-shadow: none !important;
     transition: box-shadow 150ms ease-out;
 }
@@ -364,6 +364,25 @@
     color: #1C0A00 !important;
     text-shadow: none !important;
 }
+
+/* edx v1 paints an inset navy glow on every focused/active button; on this
+   round avatar that reads as a vignette. Match `:not(:disabled)` so we outrank it,
+   and restate the ring here so it grows instead of snapping - `none` can't
+   interpolate with a spread value. */
+   .nav-profile:focus:not(:disabled),
+   .nav-profile:active:not(:disabled) {
+       box-shadow: 0 0 0 0 #F0E4CC;
+   }
+   
+   .nav-profile:hover:focus:not(:disabled),
+   .nav-profile:hover:active:not(:disabled) {
+       box-shadow: 0 0 0 3px #F0E4CC;
+   }
+   
+   .nav-profile[aria-expanded="true"]:focus:not(:disabled),
+   .nav-profile[aria-expanded="true"]:active:not(:disabled) {
+       box-shadow: 0 0 0 5px #F0E4CC;
+   }
 
 /* Just fills the button - the border and the round clip both belong to
    .nav-profile above, not to this image. */
