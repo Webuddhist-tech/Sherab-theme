@@ -572,8 +572,7 @@
 }
 
 /* The selected marker sits inside the shell padding, vertically centred on the row. */
-.nav-menu-item[aria-current="page"]::before,
-.nav-menu-item[aria-checked="true"]::before {
+.nav-menu-item[aria-current="page"]::before {
     content: '';
     position: absolute;
     left: 4px;
@@ -678,18 +677,23 @@ img.nav-menu-id-avatar {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    line-height: 1.4;
 }
 
 .nav-menu-id-name {
     color: #1C0A00;
     font-size: 14px !important;
     font-weight: 600 !important;
+    /* Explicit taller line box: identity names can be Tibetan or other tall
+       scripts; overflow:hidden above clips to this height (same rationale as
+       .nav-course-title). 1.65 gives headroom above 1.4 and 1.55 used
+       elsewhere for native script rows. */
+    line-height: 1.65;
 }
 
 .nav-menu-id-email {
     color: #8B6A50;
     font-size: 12px !important;
+    line-height: 1.4;
 }
 
 /* ---------------------------------------------------------------- language rows */
