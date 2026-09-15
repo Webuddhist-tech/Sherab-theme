@@ -685,9 +685,9 @@ img.nav-menu-id-avatar {
     font-weight: 600 !important;
     /* Explicit taller line box: identity names can be Tibetan or other tall
        scripts; overflow:hidden above clips to this height (same rationale as
-       .nav-course-title). 1.65 gives headroom above 1.4 and 1.55 used
-       elsewhere for native script rows. */
-    line-height: 1.65;
+       .nav-course-title). 2.2 gives enough headroom for vowel marks and
+       subjoined letters at 14px. */
+    line-height: 2.2;
 }
 
 .nav-menu-id-email {
