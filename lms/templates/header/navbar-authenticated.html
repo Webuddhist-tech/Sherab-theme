@@ -19,6 +19,7 @@ from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_
   self.real_user = getattr(user, 'real_user', user)
   profile_image_url = get_profile_image_urls_for_user(self.real_user)['medium']
   has_profile_image = getattr(self.real_user.profile, 'has_profile_image', False)
+  wishlist_url = f"{settings.EXTENSION_BASE_URL}/wishlist"
 
   support_link = configuration_helpers.get_value('SUPPORT_SITE_LINK', settings.SUPPORT_SITE_LINK)
   doc_link = get_online_help_info(online_help_token)['doc_url']
@@ -48,7 +49,7 @@ from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_
             </a>
             % endif
             <!-- WISHLIST LINK (hamburger menu)-->
-            <a href="/wishlist" class="nav-menu-item" role="menuitem">
+            <a href="${wishlist_url}" class="nav-menu-item" role="menuitem">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
                 <span>${_("Wishlist")}</span>
             </a>
@@ -122,7 +123,7 @@ from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_
             <a href="/courses" class="nav-link ${'nav-link-active' if '/courses' in request.path else ''}">${_("Discover new")}</a>
         % endif
         <!-- WISHLIST LINK -->
-        <a href="/wishlist" class="nav-link ${'nav-link-active' if '/wishlist' in request.path else ''}">${_("Wishlist")}</a>
+        <a href="${wishlist_url}" class="nav-link ${'nav-link-active' if '/wishlist' in request.path else ''}">${_("Wishlist")}</a>
 
         % if show_sysadmin_dashboard:
             <a href="${reverse('sysadmin')}" class="nav-link">${_("Sysadmin")}</a>
