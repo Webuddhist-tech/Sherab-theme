@@ -17,7 +17,7 @@
   app_store_url = 'https://apps.apple.com/us/app/sherab/id6747565399'
   become_partner_url = '#'
   catalog_base = (getattr(settings, 'CATALOG_MICROFRONTEND_URL', None) or '').rstrip('/')
-  schools_partners_url = catalog_base + '/#partner-carousel-title' if catalog_base else reverse('root')
+  campuses_url = catalog_base + '/#partner-carousel-title' if catalog_base else reverse('root')
 %>
 
 <footer class="site-footer" role="contentinfo" aria-label="${_('Site footer')}">
@@ -55,8 +55,8 @@
         </button>
         <nav class="ft-col-body" id="ft-col-learn" aria-label="${_('Learn')}">
           <a class="footer-link" href="/courses">${_('Explore Courses')}</a>
-          <a class="footer-link" href="${schools_partners_url}">${_('Schools & Partners')}</a>
-          <a class="footer-link" href="${become_partner_url}">${_('Become a Course Partner')}</a>
+          <a class="footer-link" href="${campuses_url}">${_('Campuses')}</a>
+          <a class="footer-link" href="${become_partner_url}">${_('Start a Campus')}</a>
         </nav>
       </div>
 
