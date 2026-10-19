@@ -605,6 +605,15 @@
     border-radius: 16px 16px 0 0;
 }
 
+#partner-details .discovery-card .partner-logo-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+#partner-details .discovery-card .partner-logo-wrapper .partner-logo {
+    object-fit: contain;
+}
+
 #partner-details .discovery-card .discovery-card-link:hover,
 #partner-details .discovery-card .discovery-card-link:focus {
     text-decoration: none !important;
