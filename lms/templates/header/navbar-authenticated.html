@@ -40,12 +40,12 @@ from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_
         <div class="nav-menu nav-menu-main" id="navMenu" role="menu" aria-labelledby="navBtn">
             <a href="${reverse('dashboard')}" class="nav-menu-item" role="menuitem">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-                <span>${_("Dashboard")}</span>
+                <span>${_("My Courses")}</span>
             </a>
             % if show_explore_courses:
             <a href="/courses" class="nav-menu-item" role="menuitem">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.6 13.6 7.8 16.2 10.4 10.4 16.2 7.8"/></svg>
-                <span>${_("Discover new")}</span>
+                <span>${_("Explore Courses")}</span>
             </a>
             % endif
             <!-- WISHLIST LINK (hamburger menu)-->
@@ -118,9 +118,9 @@ from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_
     <%include file="navbar-logo-header.html" args="online_help_token=online_help_token"/>
     
     <div class="nav-links">
-        <a href="${reverse('dashboard')}" class="nav-link ${'nav-link-active' if reverse('dashboard') == request.path else ''}">${_("Dashboard")}</a>
+        <a href="${reverse('dashboard')}" class="nav-link ${'nav-link-active' if reverse('dashboard') == request.path else ''}">${_("My Courses")}</a>
         % if show_explore_courses:
-            <a href="/courses" class="nav-link ${'nav-link-active' if '/courses' in request.path else ''}">${_("Discover new")}</a>
+            <a href="/courses" class="nav-link ${'nav-link-active' if '/courses' in request.path else ''}">${_("Explore Courses")}</a>
         % endif
         <!-- WISHLIST LINK -->
         <a href="${wishlist_url}" class="nav-link ${'nav-link-active' if '/wishlist' in request.path else ''}">${_("Wishlist")}</a>
