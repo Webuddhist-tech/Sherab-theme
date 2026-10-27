@@ -240,6 +240,47 @@ hr {
     .enrollment-wrapper table td {
         padding: 10px 12px;
     }
+
+    /* Instructor dashboard title, Studio link, and sub-tab navigation */
+    .instructor-dashboard-content-2 .instructor-dashboard-title {
+        display: block;
+    }
+
+    .instructor-dashboard-content-2 .wrap-instructor-info.studio-view {
+        display: block;
+        width: 100%;
+        clear: both;
+        margin: 0 0 0.85rem;
+        text-align: left;
+    }
+
+    .instructor-dashboard-content-2 .wrap-instructor-info.studio-view .instructor-info-action {
+        float: none;
+        display: inline-block;
+        margin-left: 0;
+    }
+
+    .instructor-dashboard-content-2 .instructor-nav {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.15rem 0.35rem;
+    }
+
+    .instructor-dashboard-content-2 .instructor-nav .nav-item {
+        display: block;
+        margin: 0;
+    }
+
+    .instructor-dashboard-content-2 .instructor-nav .nav-item .btn-link {
+        display: inline;
+        width: auto;
+        box-sizing: border-box;
+        padding: 0.35rem 0.35rem 0.35rem 0;
+        text-align: left;
+        white-space: normal;
+        line-height: 1.25;
+        font-size: 0.82rem;
+    }
 }
 
 /* Tibetan course name in instructor dashboard course info uses Jomolhari */
