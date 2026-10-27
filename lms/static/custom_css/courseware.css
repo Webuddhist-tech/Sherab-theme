@@ -1,0 +1,796 @@
+/*
+ * Course content inside the learning MFE's unit iframe (the LMS /xblock/ page,
+ * courseware-chromeless.html, body.view-in-course), styled as in the WBA
+ * Course Unit design. The learning MFE's own frame is styled by brand-openedx
+ * (paragon/_learning.scss); brand styles can't reach inside this iframe, so
+ * the brand values are repeated here.
+ *
+ * Sections:
+ *   1. Fonts and base text
+ *   2. Problems: question, choices, dropdown, text input, buttons, feedback
+ *   3. Reading text (HTML component)
+ *   4. Video
+ *
+ * Open response assessments (ORA) are a separate plugin and are not styled here.
+ *
+ * Brand palette (brand-openedx paragon/_variables.scss):
+ *   espresso #1C0A00 (text)       deep-brown #5A2D0C     deep-saffron #6B3300
+ *   saffron  #E8873A (accent)     saffron hover #C9712A  teal #0C4E68 (links)
+ *   parchment #FDF6EC  sand #F0E4CC  dusk #E0D0B0 (borders)  bark #C4A882
+ *   clay #8B6A50 (muted)          pass #1B7A4B           danger #B3261E
+ *
+ * Selectors start at .view-in-course and follow the built-in block CSS
+ * (.xmodule_display.xmodule_ProblemBlock div.problem ...) so they outrank it.
+ */
+
+/* ===================================================================== */
+/* 1. Fonts and base text                                                */
+/* ===================================================================== */
+
+/* DM Sans and Cormorant Garamond are declared in footer.css, which this page
+   doesn't load. Jomolhari / Noto Serif Tibetan come from style.css. */
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/DM_Sans/DMSans-Variable.woff2") format("woff2-variations");
+  font-weight: 100 1000;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("../fonts/Cormorant_Garamond/CormorantGaramond-Variable.woff2") format("woff2-variations");
+  font-weight: 300 700;
+  font-display: swap;
+}
+
+body.view-in-course {
+  background: #FFFFFF;
+  color: #1C0A00;
+  font-family: "DM Sans", "Noto Serif Tibetan", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Course-authored text: Tibetan in Jomolhari (style.css limits it to the
+   Tibetan range), everything else in DM Sans. style.css forces Jomolhari +
+   Open Sans on these elements with !important, so this needs !important too.
+   Icon elements are left alone so their icon fonts keep working. */
+.view-in-course .xblock :is(h1, h2, h3, h4, h5, h6, p, li, label, legend, td, th, blockquote, dt, dd),
+.view-in-course .xblock div:not([class*="icon"]):not(.fa),
+.view-in-course .xblock span:not([class*="icon"]):not(.fa):not([class*="fa-"]) {
+  font-family: "Jomolhari", "DM Sans", "Noto Serif Tibetan", "Segoe UI", Roboto, sans-serif !important;
+}
+
+.view-in-course .xblock a {
+  color: #0C4E68;
+  text-decoration-color: rgba(12, 78, 104, 0.35);
+  text-underline-offset: 3px;
+}
+
+.view-in-course .xblock a:hover,
+.view-in-course .xblock a:focus {
+  color: #093C52;
+  text-decoration-color: currentColor;
+}
+
+.view-in-course .xblock :focus-visible {
+  outline: 3px solid #0C4E68;
+  outline-offset: 2px;
+}
+
+/* ===================================================================== */
+/* 2. Problems                                                           */
+/* ===================================================================== */
+
+/* Problem title and points ("1 point possible (graded)"). */
+.view-in-course .xmodule_display.xmodule_ProblemBlock .problem-header {
+  margin: 0 0 4px;
+  color: #1C0A00;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock .problem-progress {
+  margin-bottom: 18px;
+  color: #8B6A50;
+  font-size: 13.5px;
+}
+
+/* The question and its instructions. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem p,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .response-fieldset-legend,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .problem-group-label {
+  color: #1C0A00;
+  font-size: 16.5px;
+  line-height: 1.9;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .response-fieldset-legend,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .problem-group-label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .question-description {
+  margin: -4px 0 12px;
+  color: #8B6A50;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+/* --- Choices (single and multiple select) ---------------------------- */
+
+/* Each choice is a bordered row; the real radio/checkbox (still the focusable,
+   clickable control) sits inside it on the left, drawn as the design's mark:
+   a tan ring, saffron once chosen, green/red after submitting. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup .field {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input[type="radio"],
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 18px;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  border: 1.8px solid #C4A882;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: none;
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input[type="checkbox"] {
+  border-radius: 6px;
+}
+
+/* Chosen: radio is a saffron disc with a white ring; checkbox a white tick. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input[type="radio"]:checked {
+  border-color: #E8873A;
+  background: #E8873A;
+  box-shadow: inset 0 0 0 3.5px #FFFFFF;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input[type="checkbox"]:checked {
+  border-color: #E8873A;
+  background: #E8873A url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 12.5 10 17.5 19 7.5'/%3E%3C/svg%3E") center / 14px no-repeat;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input[type="radio"]:focus-visible,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input[type="checkbox"]:focus-visible {
+  outline: 3px solid #0C4E68;
+  outline-offset: 2px;
+}
+
+/* After submitting, the mark follows its row's result. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup .field:has(.choicegroup_correct) input:checked {
+  border-color: #1B7A4B;
+  background-color: #1B7A4B;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup .field:has(.choicegroup_incorrect) input:checked {
+  border-color: #B3261E;
+  background-color: #B3261E;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup label {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 14px 18px 14px 50px;
+  border: 1.5px solid #E0D0B0;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: #1C0A00;
+  font-size: 15.5px;
+  line-height: 1.8;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input:hover + label,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input + label:hover {
+  border: 1.5px solid #C4A882;
+  background: #FDF6EC;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input:focus + label {
+  border: 1.5px solid #C4A882;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input:focus-visible + label {
+  outline: 3px solid #0C4E68;
+  outline-offset: 2px;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input:checked + label {
+  border: 1.5px solid #E8873A;
+  background: #FFFFFF;
+}
+
+/* After submitting: green for correct, red for incorrect, saffron for partly. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input + label.choicegroup_correct,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input:hover + label.choicegroup_correct,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input:focus + label.choicegroup_correct {
+  border: 1.5px solid #1B7A4B;
+  background: #F1F8F3;
+  box-shadow: inset 0 0 0 1px #1B7A4B;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input + label.choicegroup_incorrect,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input:hover + label.choicegroup_incorrect,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input:focus + label.choicegroup_incorrect {
+  border: 1.5px solid #B3261E;
+  background: #FDF2F1;
+  box-shadow: inset 0 0 0 1px #B3261E;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input + label.choicegroup_partially-correct,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input:hover + label.choicegroup_partially-correct,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input:focus + label.choicegroup_partially-correct {
+  border: 1.5px solid #C9712A;
+  background: #FDF6EC;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input + label.choicegroup_correct .status-icon::after {
+  color: #1B7A4B;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .choicegroup input + label.choicegroup_incorrect .status-icon::after {
+  color: #B3261E;
+}
+
+/* --- Dropdown and text input ------------------------------------------ */
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem select,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .capa_inputtype.textline input[type="text"] {
+  box-sizing: border-box;
+  min-height: 48px;
+  max-width: 380px;
+  padding: 8px 14px;
+  border: 1.5px solid #E0D0B0;
+  border-radius: 10px;
+  background-color: #FFFFFF;
+  color: #1C0A00;
+  font-family: "Jomolhari", "DM Sans", "Noto Serif Tibetan", sans-serif;
+  font-size: 15.5px;
+  line-height: 1.6;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem select {
+  width: 100%;
+  padding-right: 42px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B3300' stroke-width='2' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-position: right 14px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem select:hover,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .capa_inputtype.textline input[type="text"]:hover {
+  border-color: #C4A882;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem select:focus,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .capa_inputtype.textline input[type="text"]:focus {
+  border-color: #E8873A;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(232, 135, 58, 0.25);
+}
+
+/* The text input's wrapper carries the result once submitted. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .capa_inputtype.textline .correct input[type="text"] {
+  border-color: #1B7A4B;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .capa_inputtype.textline .incorrect input[type="text"] {
+  border-color: #B3261E;
+}
+
+/* "Answer: ..." shown after Show answer. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .answer {
+  color: #1B7A4B;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* --- Buttons ---------------------------------------------------------- */
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action {
+  margin-top: 22px;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .submit-attempt-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+}
+
+/* Submit: the saffron call to action. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .submit-attempt-container .submit {
+  min-height: 44px;
+  margin: 0;
+  padding: 12px 30px;
+  border: 0;
+  border-radius: 10px;
+  background: #E8873A;
+  box-shadow: none;
+  color: #1C0A00;
+  font-family: "DM Sans", sans-serif;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-shadow: none;
+  transition: background 150ms ease;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .submit-attempt-container .submit:hover:not([disabled]),
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .submit-attempt-container .submit:focus:not([disabled]) {
+  background: #C9712A;
+  color: #1C0A00;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .submit-attempt-container .submit[disabled] {
+  background: #F0E4CC;
+  color: #A08A6E;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+/* "You have used 0 of 2 attempts". */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .submission-feedback {
+  margin: 0;
+  color: #8B6A50;
+  font-size: 14px;
+}
+
+/* Save as a teal text button; Show answer, Reset and Hint as quiet bordered
+   buttons. The built-in block CSS forces a blue hover colour with !important,
+   so the colours here are !important too. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-buttons-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px 14px;
+  margin-top: 22px;
+}
+
+/* Each button leads with a small Bootstrap Icons glyph. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn .icon {
+  display: none;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn::before {
+  font-family: "bootstrap-icons";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn.save::before { content: "\f1a2"; }
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn.show::before { content: "\f341"; }
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn.reset::before { content: "\f117"; }
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn.hint-button::before { content: "\f46b"; }
+
+@media (max-width: 560px) {
+  .view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-buttons-wrapper {
+    justify-content: space-between;
+  }
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-button-wrapper {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  max-width: none;
+  margin: 0;
+  padding: 6px 14px;
+  border: 1.5px solid #C4A882;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: #5A2D0C !important;
+  font-family: "DM Sans", sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn:hover:not([disabled]),
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn:focus:not([disabled]),
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn:active:not([disabled]) {
+  border-color: #6B3300;
+  background: #FBF4E6;
+  color: #1C0A00 !important;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn.save {
+  border-color: transparent;
+  background: transparent;
+  color: #0C4E68 !important;
+}
+
+/* Save hovers to a soft teal fill rather than an underline. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn.save:hover:not([disabled]),
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn.save:focus:not([disabled]) {
+  border-color: #B8D3DE;
+  background: #E3EFF4;
+  color: #093C52 !important;
+}
+
+/* No underlines on any action button; the btn-link class adds them on hover. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn * {
+  text-decoration: none !important;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn[disabled] {
+  border-color: #E0D0B0;
+  background: #FFFFFF;
+  color: #A08A6E !important;
+  cursor: not-allowed;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .action .problem-action-btn.save[disabled] {
+  border-color: transparent;
+  background: transparent;
+}
+
+/* --- Feedback banners (correct, incorrect, saved, hints, answer shown) -- */
+
+/* A flat tinted card with the icon in a coloured circle, per tone: saved and
+   warnings tan, correct green, incorrect red, answer shown and hints teal. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification {
+  display: flex;
+  float: none;
+  align-items: center;
+  gap: 14px;
+  margin-top: 26px;
+  padding: 18px 22px;
+  border: 1px solid #C4A882;
+  border-radius: 12px;
+  background: #FDF6EC;
+  box-shadow: none;
+  color: #5A2D0C;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.is-hidden {
+  display: none;
+}
+
+/* The problem script reveals banners with jQuery's show(), which sets an
+   inline display: block; keep those in the flex layout. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification[style*="display: block"] {
+  display: flex !important;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification .notification-btn-wrapper {
+  float: none;
+  margin-left: auto;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification .notification-message {
+  flex: 1 1 auto;
+  width: auto;
+  margin: 0;
+  color: inherit;
+  font-family: "DM Sans", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification .icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  position: static;
+  float: none;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  border-radius: 50%;
+  background: #8B6A50;
+  color: #FFFFFF;
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* Plain glyphs inside the circle, in place of the theme's filled-circle ones. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification .icon.fa.fa-check::before { content: "\f633" !important; }
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification .icon.fa.fa-close::before { content: "\f659" !important; }
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification .icon.fa.fa-info-circle::before { content: "\f646" !important; }
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification .icon.fa.fa-exclamation-circle::before { content: "\f63c" !important; }
+/* Answer-shown banner: the eye from the Show answer button, in a circle like the others. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.general.notification-show-answer .icon { border-radius: 50%; background: #1B7A4B; }
+/* Green like the correct choice the answer highlights. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.general.notification-show-answer { border-color: #1B7A4B; background: #F1F8F3; color: #16603B; }
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.notification-show-answer .icon.fa::before { content: "\f341" !important; }
+/* Saved banner: a bookmark with a tick, to match the Save button's bookmark. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification .icon.fa.fa-save::before { content: "\f196" !important; }
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification .icon.fa.fa-question::before { content: "\f64e" !important; }
+
+/* Saved (not yet graded) and gentle alerts: yellow. */
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.warning {
+  border-color: #E3B341;
+  background: #FFF8E1;
+  color: #6B4A00;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.warning .icon {
+  background: #D99A0B;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.success {
+  border-color: #1B7A4B;
+  background: #F1F8F3;
+  color: #16603B;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.success .icon {
+  background: #1B7A4B;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.error {
+  border-color: #B3261E;
+  background: #FDF2F1;
+  color: #8E1E17;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.error .icon {
+  background: #B3261E;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.general,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.problem-hint {
+  border-color: #0C4E68;
+  background: #F1F7FA;
+  color: #0A3F55;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.general .icon,
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification.problem-hint .icon {
+  border-radius: 8px;
+  background: #0C4E68;
+}
+
+.view-in-course .xmodule_display.xmodule_ProblemBlock div.problem .notification .notification-btn {
+  min-height: 36px;
+  padding: 7px 14px;
+  border: 1.5px solid #C4A882;
+  border-radius: 10px;
+  background: #FFFFFF;
+  color: #5A2D0C;
+  font-family: "DM Sans", sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+/* Staff-only Submission history / Staff debug info links under a problem:
+   small muted text links, since learners never see them. */
+.view-in-course .wrap-instructor-info {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 18px;
+  clear: both;
+  margin: 18px 0 0;
+}
+
+.view-in-course .wrap-instructor-info .instructor-info-action {
+  float: none;
+  margin: 0;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #A08A6E;
+  font-family: "DM Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.4;
+  text-decoration: none;
+  text-transform: none;
+  white-space: nowrap;
+  transition: color 150ms ease;
+}
+
+.view-in-course .wrap-instructor-info .instructor-info-action:hover,
+.view-in-course .wrap-instructor-info .instructor-info-action:focus {
+  background: transparent;
+  color: #5A2D0C;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 767.98px) {
+  .view-in-course .wrap-instructor-info {
+    display: none;
+  }
+}
+
+/* ===================================================================== */
+/* 3. Reading text (HTML component)                                      */
+/* ===================================================================== */
+
+.view-in-course .xmodule_display.xmodule_HtmlBlock {
+  color: #3A2A1C;
+}
+
+.view-in-course .xmodule_display.xmodule_HtmlBlock p,
+.view-in-course .xmodule_display.xmodule_HtmlBlock li {
+  color: #3A2A1C;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.view-in-course .xmodule_display.xmodule_HtmlBlock h1,
+.view-in-course .xmodule_display.xmodule_HtmlBlock h2 {
+  color: #1C0A00;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.view-in-course .xmodule_display.xmodule_HtmlBlock h2 {
+  font-size: 26px;
+}
+
+.view-in-course .xmodule_display.xmodule_HtmlBlock h3 {
+  color: #6B3300;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.view-in-course .xmodule_display.xmodule_HtmlBlock h4,
+.view-in-course .xmodule_display.xmodule_HtmlBlock h5,
+.view-in-course .xmodule_display.xmodule_HtmlBlock h6 {
+  color: #1C0A00;
+  font-weight: 700;
+}
+
+.view-in-course .xmodule_display.xmodule_HtmlBlock blockquote {
+  margin: 20px 0;
+  padding: 18px 22px;
+  border: 0;
+  border-radius: 10px;
+  background: #FDF6EC;
+  color: #1C0A00;
+  font-size: 17px;
+  line-height: 2;
+}
+
+.view-in-course .xmodule_display.xmodule_HtmlBlock img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.view-in-course .xmodule_display.xmodule_HtmlBlock hr {
+  border: 0;
+  border-top: 1px solid #EFE2CE;
+}
+
+.view-in-course .xmodule_display.xmodule_HtmlBlock table {
+  border-collapse: collapse;
+}
+
+.view-in-course .xmodule_display.xmodule_HtmlBlock th,
+.view-in-course .xmodule_display.xmodule_HtmlBlock td {
+  padding: 10px 14px;
+  border: 1px solid #E0D0B0;
+}
+
+.view-in-course .xmodule_display.xmodule_HtmlBlock th {
+  background: #FDF6EC;
+  color: #1C0A00;
+  font-weight: 600;
+}
+
+/* ===================================================================== */
+/* 4. Video                                                              */
+/* ===================================================================== */
+
+/* Rounded frame on parchment, as the design's 16:9 video box. */
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .tc-wrapper {
+  overflow: hidden;
+  border: 1px solid #E0D0B0;
+  border-radius: 14px;
+  background: #FDF6EC;
+}
+
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .video-wrapper {
+  background: #1C0A00;
+}
+
+/* Control bar: espresso, with a saffron progress line. */
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .video-wrapper .video-controls {
+  border-top: 0;
+  background: #1C0A00;
+  color: #FDF6EC;
+}
+
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .video-wrapper .video-controls .slider {
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* The played part of the progress line (.ui-widget-header). */
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .video-wrapper .video-controls .slider .ui-widget-header {
+  border-color: #E8873A;
+  background: #E8873A;
+}
+
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .video-wrapper .video-controls .slider .ui-slider-handle {
+  border-color: #E8873A;
+  background: #E8873A;
+  box-shadow: none;
+}
+
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .video-wrapper .video-controls .control,
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .video-wrapper .video-controls button {
+  color: rgba(253, 246, 236, 0.85);
+}
+
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .video-wrapper .video-controls .control:hover,
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .video-wrapper .video-controls .control:focus,
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .video-wrapper .video-controls button:hover,
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .video-wrapper .video-controls button:focus {
+  color: #E8873A;
+}
+
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .video-wrapper .video-controls .vidtime {
+  color: rgba(253, 246, 236, 0.7);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Transcript panel beside or under the video. */
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .subtitles {
+  background: #FFFFFF;
+}
+
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .subtitles .subtitles-menu li {
+  color: #5A2D0C;
+}
+
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .subtitles .subtitles-menu li.current {
+  color: #1C0A00;
+  font-weight: 600;
+}
+
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .subtitles .subtitles-menu li:hover {
+  color: #6B3300;
+}
+
+/* Downloads and transcript links below the video. */
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .wrapper-downloads a,
+.view-in-course .xmodule_display.xmodule_VideoBlock .video .wrapper-downloads .btn-link {
+  color: #0C4E68;
+}
